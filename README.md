@@ -2,7 +2,7 @@
 Dockerfile for an image running ESMFold
 
 # Notes
-The repo is a clone of https://github.com/biochunan/esmfold-docker-image, but with the author's Google Docs downloads replaced by our cloud storage.
+The repo is a clone of https://github.com/biochunan/esmfold-docker-image, but with the author's Google Docs downloads replaced by our cloud storage. Before building, you need to download 5 files from gs://ce-resources/esmfold_data/ (esm-main.tar.gz,esm2_t36_3B_UR50D-contact-regression.pt,esm2_t36_3B_UR50D.pt,esmfold_3B_v1.pt, openfold.tar.gz) and place them in the same directory as the Dockerfile to be part of the build env (you can also edit the Dockerfile to pull those directly from the cloud, if desired).
 
 The image can take about 30-40 minutes to build and ends up being about 30-40 GBs in size, so very large (about 20% of that are the model weights). It doesn't affect performance, but worth keeping that in mind if ingress/egress is involved.  
 
