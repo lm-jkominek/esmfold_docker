@@ -12,3 +12,75 @@ The image can take about 30-40 minutes to build and ends up being about 30-40 GB
 The VM running the image (either done manually or spin-up automatically) must have CUDA and an Nvidia driver installed. This can be done manually, or using a base environment that already has those such as the Debian-based "Deep Learning VM with CUDA 11.3" on GCP (the VM might ask you whether to install the driver on first login). CUDA 11.8 wasn't tested but should work just fine, whereas CUDA 12+ might not work.  
 
 This was tested using Nvidia L4 and A100 GPUs, but the code can also work without a GPU, although the CPU code is about 10x slower and not fully parallelized, so only uses about 25-50% of cores available.
+
+# Running the image
+
+The information below is from the original repo.
+
+### Help information 
+
+Run the following command to see the help information of `esm-fold`:
+```shell
+$ docker run --rm esmfold:base --help 
+```
+
+stdout: 
+```shell
+usage: esm-fold [-h] -i FASTA -o PDB [-m MODEL_DIR]
+                [--num-recycles NUM_RECYCLES]
+                [--max-tokens-per-batch MAX_TOKENS_PER_BATCH]
+                [--chunk-size CHUNK_SIZE] [--cpu-only] [--cpu-offload]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -i FASTA, --fasta FASTA
+                        Path to input FASTA file
+  -o PDB, --pdb PDB     Path to output PDB directory
+  -m MODEL_DIR, --model-dir MODEL_DIR
+                        Parent path to Pretrained ESM data directory.
+  --num-recycles NUM_RECYCLES
+                        Number of recycles to run. Defaults to number used in
+                        training (4).
+  --max-tokens-per-batch MAX_TOKENS_PER_BATCH
+                        Maximum number of tokens per gpu forward-pass. This
+                        will group shorter sequences together for batched
+                        prediction. Lowering this can help with out of memory
+                        issues, if these occur on short sequences.
+  --chunk-size CHUNK_SIZE
+                        Chunks axial attention computation to reduce memory
+                        usage from O(L^2) to O(L). Equivalent to running a for
+                        loop over chunks of of each dimension. Lower values
+                        will result in lower memory usage at the cost of
+                        speed. Recommended values: 128, 64, 32. Default: None.
+  --cpu-only            CPU only
+  --cpu-offload         Enable CPU offloading
+```
+
+### Run ESMFold with fasta file as input 
+```shell
+$ docker run --rm --gpus all \
+    -v ./example/input:/input \
+    -v ./example/output:/output \
+    esmfold:base \
+    -i /input/1a2y-HLC.fasta -o /output > ./example/logs/pred.log 2>./example/logs/pred.err \
+```
+- `-i /input/1a2y-HLC.fasta`: input fasta file
+- `-o /output`: path to output predicted structure 
+- `> ./example/logs/pred.log 2>./example/logs/pred.err`: redirect stdout and stderr to log files
+other flags 
+- `--num-recycles NUM_RECYCLES`: Number of recycles to run. Defaults to number used in training (default is 4).
+- `--max-tokens-per-batch MAX_TOKENS_PER_BATCH`: Maximum number of tokens per gpu forward-pass. This will group shorter sequences together for batched prediction. Lowering this can help with out of memory issues, if these occur on short sequences.
+- `--chunk-size CHUNK_SIZE`: Chunks axial attention computation to reduce memory usage from O(L^2) to O(L). Equivalent to running a for loop over chunks of of each dimension. Lower values will result in lower memory usage at the cost of speed. Recommended values: 128, 64, 32. Default: None.
+- `--cpu-only`: CPU only
+- `--cpu-offload`: Enable CPU offloading
+
+### Overwrite entrypoint 
+If you want to overwrite the entrypoint, you can do so by adding the following to the end of the `docker run` command:
+```shell
+$ docker run --rm --gpus all --entrypoint "/bin/zsh" esmfold:base -c "echo 'hello world'"
+```
+
+### Test GPU 
+```shell
+$ docker run --rm --gpus all --entrypoint "nvidia-smi" esmfold:base 
+```
