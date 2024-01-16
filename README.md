@@ -15,7 +15,7 @@ This was tested using Nvidia L4 and A100 GPUs, but the code can also work withou
 
 # Running the image
 
-The information below is from the original repo.
+The information below is from the original repo. If the GPU runs out of memory (GPUs with 20GB of memory do that at about 600 residues, 40GB GPUs at 1000 residues), try progressively lower values of the `--chunk-size`, e.g. 512, 256, 128, 64, 32, 16.
 
 ### Help information 
 
