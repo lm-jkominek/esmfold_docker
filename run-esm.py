@@ -1,20 +1,20 @@
 import os, sys, argparse, subprocess, copy
 from collections import defaultdict
 from Bio import SeqIO
-# import esm
-# import torch
+import torch
+import esm
 
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-i","--fasta",help="Path to input FASTA file",required=True)
 parser.add_argument("-o", "--pdb", help="Path to output PDB directory",required=True)
 parser.add_argument("-m", "--model-dir",default=None,help="Parent path to Pretrained ESM data directory.")
-parser.add_argument("--num-recycles",type=int,default=None,help="Number of recycles to run. Defaults to number used in training (4).")
-parser.add_argument("--max-tokens-per-batch",type=int,default=1024,help="Maximum number of tokens per gpu forward-pass. This will group shorter sequences together for batched prediction. Lowering this can help with out of memory issues, if these occur on short sequences.")
-parser.add_argument("--chunk-size",type=int,default=None,help="Chunks axial attention computation to reduce memory usage from O(L^2) to O(L). Equivalent to running a for loop over chunks of of each dimension. Lower values will result in lower memory usage at the cost of speed. Recommended values: 128, 64, 32. Default: None.")
-parser.add_argument("--cpu-only", help="CPU only", action="store_true")
-parser.add_argument("--cpu-offload", help="Enable CPU offloading", action="store_true")
-parser.add_argument("-g","--gpu-count", help="Number to GPUs to run on in parallel", type=int,default=1)
+parser.add_argument("--num-recycles",default=None,help="Number of recycles to run. Defaults to number used in training (4).")
+parser.add_argument("--max-tokens-per-batch",default=1024,help="Maximum number of tokens per gpu forward-pass. This will group shorter sequences together for batched prediction. Lowering this can help with out of memory issues, if these occur on short sequences.")
+parser.add_argument("--chunk-size",default=None,help="Chunks axial attention computation to reduce memory usage from O(L^2) to O(L). Equivalent to running a for loop over chunks of of each dimension. Lower values will result in lower memory usage at the cost of speed. Recommended values: 128, 64, 32. Default: None.")
+parser.add_argument("--cpu-only",help="CPU only", action="store_true")
+parser.add_argument("--cpu-offload",help="Enable CPU offloading", action="store_true")
+parser.add_argument("-g","--gpu-count",help="Number to GPUs to run on in parallel",type=int,default=1)
 args = parser.parse_args()
 
 print(args)
